@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html >
+  <head>
+	<meta charset="UTF-8">
+	<title>Conversation</title>
+
+	<link rel="stylesheet" href="normalize.css">
+	<link rel='stylesheet prefetch' href='https://fonts.googleapis.com/css?family=Open+Sans'>
+	<link rel='stylesheet prefetch' href='https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.3/jquery.mCustomScrollbar.min.css'>
+	<link rel="stylesheet" href="style.css">
+
+	<script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+	<script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+  
+  </head>
+
+  <body>
+
+	<div class="chat">
+		<div class="chat-title">
+			<h1 id="head"></h1>
+			<figure class="avatar">
+				<img src="http://tr3.cbsistatic.com/fly/bundles/techrepubliccore/images/icons/standard/icon-user-default.png" /></figure>
+				</div>
+			<div class="messages">
+				<div class="messages-content" id="msg-lst"></div>
+				</div>
+			<div class="message-box">
+				<textarea type="text" id="msg" class="message-input" placeholder="Type message..."></textarea>
+				<button type="submit" class="message-submit" onclick="submitMsg()">Send</button>
+		</div>
+	</div>
+	<div class="bg"></div>
+	<script src='http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+	<script src='https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.3/jquery.mCustomScrollbar.concat.min.js'></script>
+
+	<script>
+
+	//get user from url
+	var user = getURLParameter('User');
+	
+	//Connect with User Name
+	var socket = io();
+	socket.emit('chat message',user + " joined the chat");
+	console.log(user + " joined the chat" );
+	
+	var choice = 1;
+	var userChoice;
+	
+	var d = new Date();
+	var m = d.getMinutes();
+	
+	//Add user name to header section of chat window
+	var headingDiv       = document.getElementById("head");
+	headingDiv.innerHTML = "<H1>"+user+"</H1>";
+	
+	//On send button click
+	function submitMsg(){
+	  
+			//User choice to see the message they send
+			if( choice == 1){
+				var r = confirm("Would you like to view the messages you send."+"\n"+"This is a one time selection.");
+				if (r == true) {
+				userChoice = "OK";
+
+				}
+				choice = choice + 1; // increment so that this is just checked 1's
+			}
+
+			var user = getURLParameter('User');
+
+			//Get typed message in message-box
+			var msg = document.getElementById("msg").value;
+
+			//Add timestamp to message
+			msg = msg + '<div class="timestamp">' + d.getHours() + ':' + m + '</div>'; 
+			//console.log( 'user name '  + msg );
+			msg = user+": "+ msg;
+			
+			//Show message on message-content window to user if choice is OK
+			var div = document.getElementById('msg-lst');
+			if ( userChoice == "OK" ){
+				div.innerHTML = div.innerHTML + '<div class="message message-personal"">'+msg+'</div>'; }
+			//updateScrollbar();
+			
+			//Send message
+			socket.emit('chat message', msg);
+
+			//Reset message-box
+			document.getElementById("msg").value = '';
+			return false;
+	}
+	  	  
+	// If the server sends "chat message" event.
+	socket.on('chat message', function(msg){
+	  
+		if( msg.indexOf("joined the chat") > -1 ){
+			var div = document.getElementById('msg-lst');
+			div.innerHTML = div.innerHTML + '<div class="messages"> <li>'+msg+'</div>'
+		}
+		else{
+			msg = msg + '<div class="timestamp">' + d.getHours() + ':' + m + '</div>'; 
+			var div = document.getElementById('msg-lst');
+			div.innerHTML = div.innerHTML + '<div class="message">'+msg+'</div>';}
+			//updateScrollbar();
+	});
+	  
+	//Extract user name send from login page in url 
+	function getURLParameter(name) {
+		return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search) || [null, ''])[1].replace(/\+/g, '%20')) || null;
+	}
+
+    </script>
+
+  </body>
+</html>

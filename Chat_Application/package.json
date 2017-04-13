@@ -1,0 +1,21 @@
+{
+  "name": "Week6",
+  "version": "0.0.0",
+  "description": "chat application",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://git.heroku.com/ap17527week1.git"
+  },
+  "author": "I",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.14.0",
+    "ws": "^1.1.1",
+    "socket.io": "^1.5.1"
+  }
+}

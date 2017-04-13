@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html >
+<head>
+	<meta charset="UTF-8">
+	<title>Login</title>
+
+	<link rel="stylesheet" href="styleLogin.css">
+<script src="http://code.jquery.com/jquery-1.10.2.js"></script>
+<script type="text/javascript">
+	//On click of Sign Up 
+	function signUpFirst(callback) {
+
+		console.log( "signUpFirst" );
+		//Get entered user password
+		var userId = document.getElementById("user").value;
+		var password = document.getElementById("pass").value;
+
+		if (window.openDatabase) {
+
+		//Open DB
+		var msg;
+		var db = openDatabase('LoginTab', '1.0', 'Test DB', 2 * 1024 * 1024);
+		
+		//Create table if not exists & insert
+		db.transaction(function (tx) {
+
+		tx.executeSql('CREATE TABLE IF NOT EXISTS LoginTab (id integer primary key autoincrement,user VARCHAR(20), passwrd VARCHAR(20))');
+		tx.executeSql('INSERT INTO LoginTab (user, passwrd) VALUES (?,?)',[userId,password]);
+		callback(userId);
+		});
+		}	
+		else
+		{  alert("WebSQL is not supported by your browser!");
+		}
+
+	}
+
+	//On click of Sign In 
+	function loginFirst(callback) 
+	{
+		console.log( "loginFirst" );
+		//Get entered user password
+		var userId = document.getElementById("user").value;
+		var password = document.getElementById("pass").value;
+
+		if (window.openDatabase) {
+
+		var msg;
+		//Open DB
+		var db = openDatabase('LoginTab', '1.0', 'Test DB', 2 * 1024 * 1024);
+		
+		//Create table if not exists & check for user/password
+		db.transaction(function (tx) {
+
+		tx.executeSql('CREATE TABLE IF NOT EXISTS LoginTab (id integer primary key autoincrement,user VARCHAR(20), passwrd VARCHAR(20))');
+		tx.executeSql('SELECT * FROM LoginTab where user = ? and passwrd = ?', [userId,password], function (tx, results) {
+
+		if( results.rows.length >= 1 ){ 
+			callback(userId);
+			//alert( "user found");
+		}
+		else{ 
+			//alert( "user not found" );
+			if( userId != "" && password != "" ){
+			var headingDiv       = document.getElementById("not-user");
+			headingDiv.innerHTML = "<H3> User not found! Please Sign Up.</H3>";
+			}else
+			{
+			var headingDiv       = document.getElementById("not-user");
+			headingDiv.innerHTML = "<H3> User/Password Required.</H3>";
+			}
+
+		}
+		//alert("User is Present- " + results.rows.item(len-1).user + " & Number- " + results.rows.item(len-1).passwrd );   
+		},
+		function(tx, error){
+		console.log(error.message);
+		},
+		function(){
+		console.log( 'Query Completed' )
+
+		});
+		});
+		}	
+		else
+		{  alert("WebSQL is not supported by your browser!");
+		}
+
+	}
+	//Go to Chat Window
+	function gotToChat( name ){
+
+		console.log( "gotToChat" );
+		//Heroku url + LoggedIn user name
+		var url = 'https://ap17527-nodejs.herokuapp.com/indexChat.html' + '?User='+name;
+		window.location.href = url;
+		//location.href='http://localhost:3002?favcoor=',.$userid,';
+
+	}
+</script>
+</head>
+<body>
+
+	<body class="align">
+
+	<div class="title">
+		<img class="avatar" src="http://94f4f976cc1dc0260566-d16dc07669b422c0babe55de9cb5cf50.r56.cf4.rackcdn.com/lets-chat-header-text.png" />
+	</div>
+
+	<div class="site__container">
+		<div class="grid__container">
+			<form action="" method="post" class="form form--login">
+
+				<div class="form__field">
+				<label class="fontawesome-user" for="login__username"><span class="hidden">Username</span></label>
+				<input id= "user" name="userid"  type="text" class="form__input" placeholder="Username" required>
+				</div>
+
+				<div class="form__field">
+				<label class="fontawesome-lock" for="login__password"><span class="hidden">Password</span></label>
+				<input id= "pass" type="password" class="form__input" placeholder="Password" required>
+				</div>
+
+				<div class="form__field">
+				<input type="button" value="Sign In" onclick="loginFirst(gotToChat)">
+				</div>
+
+			</form>
+			<p class="text--center">Not a member? <a href="javascript:signUpFirst(gotToChat)">Sign up now</a> <span class="fontawesome-arrow-right"></span></p>
+			<p class ="text--center-notuser" id="not-user"></p>
+		</div>
+	</div>
+	<div class="background-image"></div>
+
+	</body>
+    
+</body>
+</html>
